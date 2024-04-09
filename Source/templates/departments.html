@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<meta charset="UTF-8">
+
+<h2 align="center">Список департаментов</h2>
+{% if current_user.is_authenticated %}
+<p align="justify">
+    <a href="/" class="btn btn-secondary">Вернутся к работам</a>
+    <a href="add_depart" class="btn btn-secondary">Добавить департамент</a></p>
+{% endif %}
+{% for depart in departments %}
+<h3>Департамент # {{ depart.id }}</h3>
+<div class="table_container">
+    <table class="my_table">
+        <tr class="my_row">
+            <td class="title" width="400px" bgcolor="#dddddd">Название департамента</td>
+            <td class="title" width="150px" bgcolor="#dddddd">Начальник</td>
+            <td class="title" width="100px" bgcolor="#dddddd" align="center">Сотрудники</td>
+            <td class="title" width="200px" bgcolor="#dddddd" align="center">Электронная почта</td>
+        </tr>
+        <tr class="my_row">
+            <td class="ordinary" bgcolor="#eeeeff">{{ depart.title.capitalize() }}</td>
+            <td class="ordinary" bgcolor="#eeeeff">{{ names[depart.chief][0] }} {{ names[depart.chief][1] }}</td>
+            <td class="ordinary" bgcolor="#eeeeff" align="center">{{ depart.members }}</td>
+            <td class="ordinary" bgcolor="#eeeeff" align="center">{{ depart.email }}</td>
+        </tr>
+
+    </table>
+</div>
+<br>
+{% if current_user.is_authenticated and current_user.id == depart.chief or current_user.id == 1  %}
+<div>
+    <a href="/edit-depart/{{ depart.id }}" class="btn btn-warning">Изменить департамент</a>
+    <a href="/delete_depart/{{ depart.id }}" class="btn btn-danger">Удалить департамент</a>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<meta charset="UTF-8">
+
+<h2 align="center">Журнал работ</h2>
+{% if current_user.is_authenticated %}
+    <p align="justify">
+    <a href="departs" class="btn btn-secondary">Отобразить департаменты</a>
+    <a href="add-job" class="btn btn-secondary">Добавить работу</a>
+    <a href="add_depart" class="btn btn-secondary">Добавить департамент</a>
+    </p>
+{% endif %}
+{% for job in jobs %}
+<h3>Задача # {{ job.id }}</h3>
+<div class="table_container">
+    <table class="my_table">
+        <tr class="my_row">
+            <td class="title" width="400px" bgcolor="#dddddd">Название работы</td>
+            <td class="title" width="150px" bgcolor="#dddddd">Руководитель команды</td>
+            <td class="title" width="100px" bgcolor="#dddddd" align="center">Продолжительность</td>
+            <td class="title" width="200px" bgcolor="#dddddd" align="center">Команда</td>
+            <td class="title" width="100px" bgcolor="#dddddd" align="center">Закончено</td>
+        </tr>
+        <tr class="my_row">
+            <td class="ordinary" bgcolor="#eeeeff">{{ job.job.capitalize() }}</td>
+            <td class="ordinary" bgcolor="#eeeeff">{{ names[job.team_leader][0] }} {{ names[job.team_leader][1] }}</td>
+            <td class="ordinary" bgcolor="#eeeeff" align="center">{{ job.work_size }} часов</td>
+            <td class="ordinary" bgcolor="#eeeeff" align="center">{{ job.collaborators }}</td>
+            {% if job.is_finished %}
+            <td class="ordinary" bgcolor="#eeffee" align="center">Закончено</td>
+            {% else %}
+            <td class="ordinary" bgcolor="#ffeeff" align="center">Не закончено</td>
+            {% endif %}
+        </tr>
+    </table>
+</div>
+<br>
+{% if current_user.is_authenticated and current_user.id == job.team_leader or current_user.id == 1  %}
+<div>
+    <a href="/edit-job/{{ job.id }}" class="btn btn-warning">Редактировать работу</a>
+    <a href="/delete-job/{{ job.id }}" class="btn btn-danger">Удалить работу</a>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %}

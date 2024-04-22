@@ -21,7 +21,8 @@ class RegisterForm(FlaskForm):
                                     validators=[EqualTo("password", "Пароли должны совпадать")])
     surname = StringField("Фамилия")
     name = StringField("Имя")
-    age = IntegerField("Возраст", validators=[NumberRange(1, 99)])
+    age = IntegerField("Возраст", validators=[NumberRange(1, 99, "Недопустимое целочисленное значение. "
+                                                                 "Число должно быть от 1 до 99.")])
     position = StringField("Должность")
     speciality = StringField("Специальность")
     address = StringField("Адрес")

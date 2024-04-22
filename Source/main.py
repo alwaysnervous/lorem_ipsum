@@ -3,7 +3,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 
 from data import db_session
 from data.departments import Department
-from data.jobs import Jobs
+from data.jobs import Jobs, Category
 from data.users import User
 from forms.departments import AddDepartForm
 from forms.users import RegisterForm, LoginForm
@@ -72,9 +72,11 @@ def logout():
 @app.route("/add-job", methods=["GET", "POST"])
 @login_required
 def add_job():
-    form = AddJobForm()
+    db_sess = db_session.create_session()
+    user_ids = [user_id[0] for user_id in db_sess.query(User.id).all()]
+    category_ids = [category_id[0] for category_id in db_sess.query(Category.id).all()]
+    form = AddJobForm(user_ids, category_ids)
     if form.validate_on_submit():
-        db_sess = db_session.create_session()
         job = Jobs(
             job=form.job.data,
             work_size=calculate_time_difference_in_hours(form.start_date.data,
@@ -83,8 +85,10 @@ def add_job():
             collaborators=form.collaborators.data,
             start_date=form.start_date.data,
             end_date=form.end_date.data,
+            category=form.category.data,
             is_finished=form.is_finished.data
         )
+
         db_sess.add(job)
         db_sess.commit()
         return redirect("/")
@@ -94,9 +98,11 @@ def add_job():
 @app.route("/edit-job/<int:job_id>", methods=["GET", "POST"])
 @login_required
 def edit_job(job_id):
-    form = AddJobForm()
+    db_sess = db_session.create_session()
+    user_ids = [user_id[0] for user_id in db_sess.query(User.id).all()]
+    category_ids = [category_id[0] for category_id in db_sess.query(Category.id).all()]
+    form = AddJobForm(user_ids, category_ids)
     if request.method == "GET":
-        db_sess = db_session.create_session()
         jobs = db_sess.query(Jobs).filter(Jobs.id == job_id,
                                           (Jobs.team_leader == current_user.id) | (
                                                   current_user.id == 1)).first()
@@ -163,17 +169,18 @@ def depart_list():
 
 @app.route('/add_depart', methods=['GET', 'POST'])
 def add_depart():
-    add_form = AddDepartForm()
+    db_sess = db_session.create_session()
+    user_ids = [user_id[0] for user_id in db_sess.query(User.id).all()]
+    add_form = AddDepartForm(user_ids)
     if add_form.validate_on_submit():
-        session = db_session.create_session()
         depart = Department(
             title=add_form.title.data,
             chief=add_form.chief.data,
             members=add_form.members.data,
             email=add_form.email.data
         )
-        session.add(depart)
-        session.commit()
+        db_sess.add(depart)
+        db_sess.commit()
         return redirect('/departs')
     return render_template('add_depart.html', title='Adding a Department', form=add_form)
 
@@ -226,8 +233,22 @@ def delete_depart(depart_id):
     return redirect('/departs')
 
 
+def add_categories(session):
+    categories = [(1, 'low'), (2, 'medium'), (3, 'high')]
+
+    for category_id, category_name in categories:
+        existing_category = session.query(Category).filter_by(id=category_id).first()
+        if not existing_category:
+            new_category = Category(id=category_id, name=category_name)
+            session.add(new_category)
+
+    session.commit()
+
+
 def main():
     db_session.global_init("db/blogs.db")
+    session = db_session.create_session()
+    add_categories(session)
     app.run("", port=8080)
 
 

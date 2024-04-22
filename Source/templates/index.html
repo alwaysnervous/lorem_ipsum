@@ -20,6 +20,7 @@
             <td class="title" width="150px" bgcolor="#dddddd">Руководитель команды</td>
             <td class="title" width="100px" bgcolor="#dddddd" align="center">Продолжительность</td>
             <td class="title" width="200px" bgcolor="#dddddd" align="center">Команда</td>
+            <td class="title" width="200px" bgcolor="#dddddd" align="center">Категория опасности</td>
             <td class="title" width="100px" bgcolor="#dddddd" align="center">Закончено</td>
         </tr>
         <tr class="my_row">
@@ -27,6 +28,7 @@
             <td class="ordinary" bgcolor="#eeeeff">{{ names[job.team_leader][0] }} {{ names[job.team_leader][1] }}</td>
             <td class="ordinary" bgcolor="#eeeeff" align="center">{{ job.work_size }} часов</td>
             <td class="ordinary" bgcolor="#eeeeff" align="center">{{ job.collaborators }}</td>
+            <td class="ordinary" bgcolor="#eeeeff" align="center">{{ job.category }}</td>
             {% if job.is_finished %}
             <td class="ordinary" bgcolor="#eeffee" align="center">Закончено</td>
             {% else %}

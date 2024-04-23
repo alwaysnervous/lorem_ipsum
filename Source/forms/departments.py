@@ -3,7 +3,7 @@ from wtforms import SubmitField, StringField, EmailField, SelectField
 from wtforms.validators import DataRequired
 
 
-def AddDepartForm(user_ids):
+def AddApplicationForm(user_ids):
     class Form(FlaskForm):
         title = StringField('Название департамента', validators=[DataRequired()])
         chief = SelectField('ID начальника', choices=user_ids, validators=[DataRequired()])

@@ -3,7 +3,7 @@ from sqlalchemy import orm
 from .db_session import SqlAlchemyBase
 
 
-class Department(SqlAlchemyBase):
+class Application(SqlAlchemyBase):
     __tablename__ = 'departments'
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     title = sa.Column(sa.String)
@@ -12,4 +12,4 @@ class Department(SqlAlchemyBase):
     email = sa.Column(sa.String)
 
     def __repr__(self):
-        return f"<Department {self.id} {self.title}>"
+        return f"<Application {self.id} {self.title}>"

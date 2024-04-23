@@ -2,10 +2,10 @@ from flask import Flask, render_template, redirect, flash, abort, request
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 from data import db_session
-from data.departments import Department
+from data.applications import Application
 from data.jobs import Jobs, Category
 from data.users import User
-from forms.departments import AddDepartForm
+from forms.departments import AddApplicationForm
 from forms.users import RegisterForm, LoginForm
 from forms.jobs import AddJobForm
 
@@ -33,13 +33,10 @@ def register():
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         user = User(
+            email=form.login.data,
             surname=form.surname.data,
             name=form.name.data,
-            age=form.age.data,
-            position=form.position.data,
-            speciality=form.speciality.data,
-            address=form.address.data,
-            email=form.login.data,
+            age=form.age.data
         )
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -155,44 +152,46 @@ def work_log():
     jobs = db_sess.query(Jobs).all()
     users = db_sess.query(User).all()
     names = {name.id: (name.surname, name.name) for name in users}
-    return render_template("index.html", jobs=jobs, names=names, title='Work log')
+    return render_template("index.html", jobs=jobs, names=names, title='Журнал работ')
 
 
-@app.route("/departs")
-def depart_list():
+@app.route("/application")
+def application_list():
     session = db_session.create_session()
-    departments = session.query(Department).all()
+    departments = session.query(Application).all()
     users = session.query(User).all()
     names = {name.id: (name.surname, name.name) for name in users}
     return render_template("departments.html", departments=departments, names=names, title='List of Departments')
 
 
-@app.route('/add_depart', methods=['GET', 'POST'])
-def add_depart():
+@app.route('/add_application', methods=['GET', 'POST'])
+def add_application():
     db_sess = db_session.create_session()
     user_ids = [user_id[0] for user_id in db_sess.query(User.id).all()]
-    add_form = AddDepartForm(user_ids)
-    if add_form.validate_on_submit():
-        depart = Department(
-            title=add_form.title.data,
-            chief=add_form.chief.data,
-            members=add_form.members.data,
-            email=add_form.email.data
+    form = AddApplicationForm(user_ids)
+    if form.validate_on_submit():
+        depart = Application(
+            title=form.title.data,
+            chief=form.chief.data,
+            members=form.members.data,
+            email=form.email.data
         )
         db_sess.add(depart)
         db_sess.commit()
         return redirect('/departs')
-    return render_template('add_depart.html', title='Adding a Department', form=add_form)
+    return render_template('add_depart.html', title='Adding a Department', form=form)
 
 
-@app.route('/edit-depart/<int:depart_id>', methods=['GET', 'POST'])
+@app.route('/edit_application/<int:depart_id>', methods=['GET', 'POST'])
 @login_required
-def edit_depart(depart_id):
-    form = AddDepartForm()
+def edit_application(depart_id):
+    db_sess = db_session.create_session()
+    user_ids = [user_id[0] for user_id in db_sess.query(User.id).all()]
+    form = AddApplicationForm(user_ids)
     if request.method == "GET":
         session = db_session.create_session()
-        depart = session.query(Department).filter(Department.id == depart_id,
-                                                  (Department.chief == current_user.id) | (
+        depart = session.query(Application).filter(Application.id == depart_id,
+                                                   (Application.chief == current_user.id) | (
                                                           current_user.id == 1)).first()
         if depart:
             form.title.data = depart.title
@@ -203,8 +202,8 @@ def edit_depart(depart_id):
             abort(404)
     if form.validate_on_submit():
         session = db_session.create_session()
-        depart = session.query(Department).filter(Department.id == depart_id,
-                                                  (Department.chief == current_user.id) | (
+        depart = session.query(Application).filter(Application.id == depart_id,
+                                                   (Application.chief == current_user.id) | (
                                                           current_user.id == 1)).first()
         if depart:
             depart.title = form.title.data
@@ -222,8 +221,8 @@ def edit_depart(depart_id):
 @login_required
 def delete_depart(depart_id):
     session = db_session.create_session()
-    depart = session.query(Department).filter(Department.id == depart_id,
-                                              (Department.chief == current_user.id) | (
+    depart = session.query(Application).filter(Application.id == depart_id,
+                                               (Application.chief == current_user.id) | (
                                                       current_user.id == 1)).first()
     if depart:
         session.delete(depart)
@@ -233,7 +232,7 @@ def delete_depart(depart_id):
     return redirect('/departs')
 
 
-def add_categories(session):
+def add_admins(session):
     categories = [(1, 'low'), (2, 'medium'), (3, 'high')]
 
     for category_id, category_name in categories:
@@ -246,9 +245,9 @@ def add_categories(session):
 
 
 def main():
-    db_session.global_init("db/blogs.db")
+    db_session.global_init("db/base.db")
     session = db_session.create_session()
-    add_categories(session)
+    add_admins(session)
     app.run("", port=8080)
 
 

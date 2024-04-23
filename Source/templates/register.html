@@ -59,33 +59,6 @@
             </div>
         {% endfor %}
 
-
-        {{ form.position.label }}
-        {{ form.position(class="form-control") }}
-        {% for error in form.position.errors %}
-            <div class="alert alert-danger" role="alert">
-                {{ error }}
-            </div>
-        {% endfor %}
-
-
-        {{ form.speciality.label }}
-        {{ form.speciality(class="form-control") }}
-        {% for error in form.speciality.errors %}
-            <div class="alert alert-danger" role="alert">
-                {{ error }}
-            </div>
-        {% endfor %}
-
-
-        {{ form.address.label }}
-        {{ form.address(class="form-control") }}
-        {% for error in form.address.errors %}
-            <div class="alert alert-danger" role="alert">
-                {{ error }}
-            </div>
-        {% endfor %}
-
     <div>{{ form.submit(type="submit", class="btn btn-primary") }}</div>
 
 </form>

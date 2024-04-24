@@ -3,12 +3,15 @@
 {% block content %}
 <meta charset="UTF-8">
 
-<h2 align="center">Журнал работ</h2>
+<h2 align="center">Журнал кейсов</h2>
 {% if current_user.is_authenticated %}
     <p align="justify">
-    <a href="departs" class="btn btn-secondary">Отобразить департаменты</a>
+    {% if current_user.is_authenticated and current_user.id == 1  %}
+    <a href="applications" class="btn btn-secondary">Отобразить заявки</a>
     <a href="add-job" class="btn btn-secondary">Добавить работу</a>
-    <a href="add_depart" class="btn btn-secondary">Добавить департамент</a>
+    {% else  %}
+    <a href="add_application" class="btn btn-secondary">Подать заявку на вступление в команду</a>
+    {% endif %}
     </p>
 {% endif %}
 {% for job in jobs %}

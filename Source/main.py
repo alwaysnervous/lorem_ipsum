@@ -5,7 +5,7 @@ from data import db_session
 from data.applications import Application
 from data.jobs import Jobs, Category
 from data.users import User
-from forms.departments import AddApplicationForm
+from forms.applications import AddApplicationForm
 from forms.users import RegisterForm, LoginForm
 from forms.jobs import AddJobForm
 
@@ -85,7 +85,6 @@ def add_job():
             category=form.category.data,
             is_finished=form.is_finished.data
         )
-
         db_sess.add(job)
         db_sess.commit()
         return redirect("/")
@@ -155,48 +154,47 @@ def work_log():
     return render_template("index.html", jobs=jobs, names=names, title='Журнал работ')
 
 
-@app.route("/application")
+@app.route("/applications")
 def application_list():
     session = db_session.create_session()
     departments = session.query(Application).all()
     users = session.query(User).all()
     names = {name.id: (name.surname, name.name) for name in users}
-    return render_template("departments.html", departments=departments, names=names, title='List of Departments')
+    if current_user.id == 1:
+        return render_template("applications.html", applications=departments, names=names, title='Список заявок')
+    else:
+        abort(404)
 
 
 @app.route('/add_application', methods=['GET', 'POST'])
 def add_application():
     db_sess = db_session.create_session()
-    user_ids = [user_id[0] for user_id in db_sess.query(User.id).all()]
-    form = AddApplicationForm(user_ids)
+    form = AddApplicationForm()
     if form.validate_on_submit():
         depart = Application(
-            title=form.title.data,
-            chief=form.chief.data,
-            members=form.members.data,
-            email=form.email.data
+            allocates_time=form.allocates_time.data,
+            what_doing=form.what_doing.data,
+            self_actions=form.self_actions.data
         )
         db_sess.add(depart)
         db_sess.commit()
-        return redirect('/departs')
-    return render_template('add_depart.html', title='Adding a Department', form=form)
+        return redirect('/applications')
+    return render_template('add_application.html', title='Подача заявки', form=form)
 
 
 @app.route('/edit_application/<int:depart_id>', methods=['GET', 'POST'])
 @login_required
 def edit_application(depart_id):
-    db_sess = db_session.create_session()
-    user_ids = [user_id[0] for user_id in db_sess.query(User.id).all()]
-    form = AddApplicationForm(user_ids)
+    form = AddApplicationForm()
     if request.method == "GET":
         session = db_session.create_session()
         depart = session.query(Application).filter(Application.id == depart_id,
                                                    (Application.chief == current_user.id) | (
                                                           current_user.id == 1)).first()
         if depart:
-            form.title.data = depart.title
+            form.allocates_time.data = depart.title
             form.chief.data = depart.chief
-            form.members.data = depart.members
+            form.self_actions.data = depart.members
             form.email.data = depart.email
         else:
             abort(404)
@@ -206,15 +204,15 @@ def edit_application(depart_id):
                                                    (Application.chief == current_user.id) | (
                                                           current_user.id == 1)).first()
         if depart:
-            depart.title = form.title.data
+            depart.title = form.allocates_time.data
             depart.chief = form.chief.data
-            depart.members = form.members.data
+            depart.members = form.self_actions.data
             depart.email = form.email.data
             session.commit()
-            return redirect('/departs')
+            return redirect('/applications')
         else:
             abort(404)
-    return render_template('add_depart.html', title='Department Edit', form=form)
+    return render_template('add_application.html', title='Department Edit', form=form)
 
 
 @app.route('/delete_depart/<int:depart_id>', methods=['GET', 'POST'])
@@ -229,7 +227,7 @@ def delete_depart(depart_id):
         session.commit()
     else:
         abort(404)
-    return redirect('/departs')
+    return redirect('/applications')
 
 
 def add_admins(session):

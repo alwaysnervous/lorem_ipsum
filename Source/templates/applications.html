@@ -32,7 +32,7 @@
 {% if current_user.is_authenticated and current_user.id == application.chief or current_user.id == 1  %}
 <div>
     <a href="/edit-application/{{ application.id }}" class="btn btn-warning">Изменить заявку</a>
-    <a href="/delete_application/{{ application.id }}" class="btn btn-danger">Удалить заявку</a>
+    <a href="/delete-application/{{ application.id }}" class="btn btn-danger">Удалить заявку</a>
 </div>
 {% endif %}
 {% endfor %}

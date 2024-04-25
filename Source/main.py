@@ -120,8 +120,8 @@ def edit_job(job_id):
             jobs.job = form.job.data
             jobs.team_leader = form.team_leader.data
             jobs.collaborators = form.collaborators.data
-            form.start_date.data = jobs.start_date
-            form.end_date.data = jobs.end_date
+            jobs.start_date = form.start_date.data
+            jobs.end_date = form.end_date.data
             jobs.is_finished = form.is_finished.data
             db_sess.commit()
             return redirect('/')
@@ -166,7 +166,7 @@ def application_list():
         abort(404)
 
 
-@app.route('/add_application', methods=['GET', 'POST'])
+@app.route('/add-application', methods=['GET', 'POST'])
 def add_application():
     db_sess = db_session.create_session()
     form = AddApplicationForm()
@@ -182,32 +182,28 @@ def add_application():
     return render_template('add_application.html', title='Подача заявки', form=form)
 
 
-@app.route('/edit_application/<int:depart_id>', methods=['GET', 'POST'])
+@app.route('/edit-application/<int:application_id>', methods=['GET', 'POST'])
 @login_required
-def edit_application(depart_id):
+def edit_application(application_id):
     form = AddApplicationForm()
     if request.method == "GET":
         session = db_session.create_session()
-        depart = session.query(Application).filter(Application.id == depart_id,
-                                                   (Application.chief == current_user.id) | (
-                                                          current_user.id == 1)).first()
-        if depart:
-            form.allocates_time.data = depart.title
-            form.chief.data = depart.chief
-            form.self_actions.data = depart.members
-            form.email.data = depart.email
+        application = session.query(Application).filter(Application.id == application_id,
+                                                        (current_user.id == 1)).first()
+        if application:
+            form.allocates_time.data = application.allocates_time
+            form.what_doing.data = application.what_doing
+            form.self_actions.data = application.self_actions
         else:
             abort(404)
     if form.validate_on_submit():
         session = db_session.create_session()
-        depart = session.query(Application).filter(Application.id == depart_id,
-                                                   (Application.chief == current_user.id) | (
-                                                          current_user.id == 1)).first()
-        if depart:
-            depart.title = form.allocates_time.data
-            depart.chief = form.chief.data
-            depart.members = form.self_actions.data
-            depart.email = form.email.data
+        application = session.query(Application).filter(Application.id == application_id,
+                                                        (current_user.id == 1)).first()
+        if application:
+            application.allocates_time = form.allocates_time.data
+            application.what_doing = form.what_doing.data
+            application.self_actions = form.self_actions.data
             session.commit()
             return redirect('/applications')
         else:
@@ -221,7 +217,7 @@ def delete_depart(depart_id):
     session = db_session.create_session()
     depart = session.query(Application).filter(Application.id == depart_id,
                                                (Application.chief == current_user.id) | (
-                                                      current_user.id == 1)).first()
+                                                       current_user.id == 1)).first()
     if depart:
         session.delete(depart)
         session.commit()

@@ -28,6 +28,12 @@ class Jobs(SqlAlchemyBase):
     end_date = sa.Column(sa.DateTime, default=datetime.datetime.now)
     is_finished = sa.Column(sa.Boolean, nullable=True)
     category = sa.Column(sa.Integer, sa.ForeignKey("category.id"))
+    thumbnail_file = sa.Column(sa.Integer, nullable=True)
+
+    user = sa.orm.relationship('User')
+    categories = sa.orm.relationship("Category",
+                                     secondary="association",
+                                     backref="jobs")
 
     def __repr__(self):
         return f"<Jobs {self.id} {self.job} {self.is_finished}>"

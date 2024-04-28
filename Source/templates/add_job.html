@@ -4,7 +4,7 @@
 
 <h1 align="center">Добавление работы</h1>
 
-<form action="" method="post">
+<form action="" method="post" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
 
         {{ form.job.label }}
@@ -50,6 +50,14 @@
         {{ form.category.label }}
         {{ form.category(class="form-control") }}
         {% for error in form.category.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+
+        {{ form.thumbnail_file.label }}
+        {{ form.thumbnail_file(class="form-control") }}
+        {% for error in form.thumbnail_file.errors %}
             <div class="alert alert-danger" role="alert">
                 {{ error }}
             </div>

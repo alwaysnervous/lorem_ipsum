@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, StringField, BooleanField, DateTimeField, SelectField
+from wtforms import SubmitField, StringField, BooleanField, DateTimeField, SelectField, FileField
 from wtforms.validators import DataRequired
 
 
@@ -12,6 +12,8 @@ def AddJobForm(user_ids, category_ids):
         end_date = DateTimeField('Дата окончания')
         is_finished = BooleanField('Работа закончена?')
         category = SelectField('ID категории опасности', choices=category_ids)
+        thumbnail_file = FileField('Привет')
         submit = SubmitField('Добавить')
 
     return Form()
+

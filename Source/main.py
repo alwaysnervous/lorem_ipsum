@@ -1,3 +1,5 @@
+import logging
+
 from flask import Flask, render_template, redirect, flash, abort, request
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
@@ -8,6 +10,8 @@ from data.users import User
 from forms.applications import AddApplicationForm
 from forms.users import RegisterForm, LoginForm
 from forms.jobs import AddJobForm
+
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 login_manager = LoginManager(app)
@@ -74,6 +78,14 @@ def add_job():
     category_ids = [category_id[0] for category_id in db_sess.query(Category.id).all()]
     form = AddJobForm(user_ids, category_ids)
     if form.validate_on_submit():
+        filename = None
+        if 'file' in request.files:
+            f = request.files['file']
+            filename = f.filename
+            if filename != '':
+                with open(f'static/img/{filename}', 'wb') as file:
+                    file.write(f.read())
+                    logging.info(f"Изображение сохранено в static/img/{filename}")
         job = Jobs(
             job=form.job.data,
             work_size=calculate_time_difference_in_hours(form.start_date.data,
@@ -83,7 +95,8 @@ def add_job():
             start_date=form.start_date.data,
             end_date=form.end_date.data,
             category=form.category.data,
-            is_finished=form.is_finished.data
+            is_finished=form.is_finished.data,
+            thumbnail_file=filename
         )
         db_sess.add(job)
         db_sess.commit()
@@ -211,23 +224,10 @@ def edit_application(application_id):
     return render_template('add_application.html', title='Department Edit', form=form)
 
 
-@app.route('/delete_depart/<int:depart_id>', methods=['GET', 'POST'])
-@login_required
-def delete_depart(depart_id):
-    session = db_session.create_session()
-    depart = session.query(Application).filter(Application.id == depart_id,
-                                               (Application.chief == current_user.id) | (
-                                                       current_user.id == 1)).first()
-    if depart:
-        session.delete(depart)
-        session.commit()
-    else:
-        abort(404)
-    return redirect('/applications')
-
-
-def add_admins(session):
-    categories = [(1, 'low'), (2, 'medium'), (3, 'high')]
+def add_categories(session):
+    categories = [(1, 'graphic'),
+                  (2, 'motion'),
+                  (3, 'web')]
 
     for category_id, category_name in categories:
         existing_category = session.query(Category).filter_by(id=category_id).first()
@@ -241,7 +241,7 @@ def add_admins(session):
 def main():
     db_session.global_init("db/base.db")
     session = db_session.create_session()
-    add_admins(session)
+    add_categories(session)
     app.run("", port=8080)
 
 

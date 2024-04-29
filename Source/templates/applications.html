@@ -3,9 +3,10 @@
 {% block content %}
 <meta charset="UTF-8">
 
-<h2 align="center">Список заявок</h2>
+<h1 align="center">Список заявок</h1>
 {% if current_user.is_authenticated %}
-<p align="justify">
+    <br>
+    <p align="justify">
     <a href="/" class="btn btn-secondary">Вернутся к работам</a>
     {% if current_user.is_authenticated and current_user.id != 1  %}
     <a href="add_application" class="btn btn-secondary">Подать заявку на вступление в команду</a></p>
@@ -16,11 +17,13 @@
 <div class="table_container">
     <table class="my_table">
         <tr class="my_row">
-            <td class="title" width="400px" bgcolor="#dddddd">Уделит времени</td>
-            <td class="title" width="150px" bgcolor="#dddddd">Чем занимается</td>
+            <td class="title" width="200px" bgcolor="#dddddd">Как зовут</td>
+            <td class="title" width="200px" bgcolor="#dddddd">Уделю времени</td>
+            <td class="title" width="150px" bgcolor="#dddddd">Чем занимаюсь</td>
             <td class="title" width="100px" bgcolor="#dddddd" align="center">На посту менеджера</td>
         </tr>
         <tr class="my_row">
+            <td class="ordinary" bgcolor="#eeeeff">{{ full_names[application.user_id] }}</td>
             <td class="ordinary" bgcolor="#eeeeff">{{ application.allocates_time }}</td>
             <td class="ordinary" bgcolor="#eeeeff">{{ application.what_doing }}</td>
             <td class="ordinary" bgcolor="#eeeeff" align="center">{{ application.self_actions }}</td>
@@ -34,6 +37,7 @@
     <a href="/edit-application/{{ application.id }}" class="btn btn-warning">Изменить заявку</a>
     <a href="/delete-application/{{ application.id }}" class="btn btn-danger">Удалить заявку</a>
 </div>
+<br><br>
 {% endif %}
 {% endfor %}
 {% endblock %}

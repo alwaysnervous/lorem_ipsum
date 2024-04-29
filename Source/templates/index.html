@@ -3,19 +3,23 @@
 {% block content %}
 <meta charset="UTF-8">
 
-<h2 align="center">Журнал кейсов</h2>
+<h1 align="center">Портфолио</h1>
 {% if current_user.is_authenticated %}
+    <br>
     <p align="justify">
-    {% if current_user.is_authenticated and current_user.id == 1  %}
+{#    Проверка на админа и аутентификацию#}
+    {% if current_user.is_authenticated and current_user.is_admin  %}
     <a href="applications" class="btn btn-secondary">Отобразить заявки</a>
     <a href="add-job" class="btn btn-secondary">Добавить работу</a>
-    {% else  %}
+    {% elif current_user.id not in restricted_to_application %}
     <a href="add-application" class="btn btn-secondary">Подать заявку на вступление в команду</a>
+    {% else %}
+    <a href="edit-application" class="btn btn-secondary">Редактировать заявку на вступление в команду</a>
     {% endif %}
     </p>
 {% endif %}
 {% for job in jobs %}
-<h3>Задача # {{ job.id }}</h3>
+<h3>Кейс # {{ job.id }}</h3>
 <div class="table_container">
     <table class="my_table">
         <tr class="my_row">
@@ -23,15 +27,15 @@
             <td class="title" width="150px" bgcolor="#dddddd">Руководитель команды</td>
             <td class="title" width="100px" bgcolor="#dddddd" align="center">Продолжительность</td>
             <td class="title" width="200px" bgcolor="#dddddd" align="center">Команда</td>
-            <td class="title" width="200px" bgcolor="#dddddd" align="center">Категория опасности</td>
+            <td class="title" width="200px" bgcolor="#dddddd" align="center">Категория дизайна</td>
             <td class="title" width="100px" bgcolor="#dddddd" align="center">Закончено</td>
         </tr>
         <tr class="my_row">
             <td class="ordinary" bgcolor="#eeeeff">{{ job.job.capitalize() }}</td>
             <td class="ordinary" bgcolor="#eeeeff">{{ names[job.team_leader][0] }} {{ names[job.team_leader][1] }}</td>
-            <td class="ordinary" bgcolor="#eeeeff" align="center">{{ job.work_size }} часов</td>
-            <td class="ordinary" bgcolor="#eeeeff" align="center">{{ job.collaborators }}</td>
-            <td class="ordinary" bgcolor="#eeeeff" align="center">{{ job.category }}</td>
+            <td class="ordinary" bgcolor="#eeeeff" align="center">{{ job.work_size }} ч.</td>
+            <td class="ordinary" bgcolor="#eeeeff" align="center">{{ collaborators_names[job.id] }}</td>
+            <td class="ordinary" bgcolor="#eeeeff" align="center">{{ category_names[job.category] }}</td>
             {% if job.is_finished %}
             <td class="ordinary" bgcolor="#eeffee" align="center">Закончено</td>
             {% else %}
@@ -39,6 +43,11 @@
             {% endif %}
         </tr>
     </table>
+<div align="center">
+{% if job.thumbnail_file %}
+<img alt="Миниатюра" src={{ "static/img/cases/" + job.thumbnail_file }}>
+{% endif %}
+</div>
 </div>
 <br>
 {% if current_user.is_authenticated and current_user.id == job.team_leader or current_user.id == 1  %}
@@ -46,6 +55,7 @@
     <a href="/edit-job/{{ job.id }}" class="btn btn-warning">Редактировать работу</a>
     <a href="/delete-job/{{ job.id }}" class="btn btn-danger">Удалить работу</a>
 </div>
+<br><br>
 {% endif %}
 {% endfor %}
 {% endblock %}

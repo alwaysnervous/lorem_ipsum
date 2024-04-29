@@ -14,15 +14,10 @@ class User(SqlAlchemyBase, UserMixin):
     age = sa.Column(sa.Integer)
     email = sa.Column(sa.String, unique=True)
     hashed_password = sa.Column(sa.String)
-    modified_date = sa.Column(sa.DateTime)
-
-    jobs = sa.orm.relationship("Jobs", back_populates='user')
+    is_admin = sa.Column(sa.Boolean)
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.hashed_password, password)
-
-    def __repr__(self):
-        return f"<User {self.id} {self.name} {self.email}>"

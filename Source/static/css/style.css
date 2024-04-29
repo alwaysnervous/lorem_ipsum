@@ -12,7 +12,7 @@ dd.col-sm-9 {
 }
 
 h1.access {
-    background:url("/static/img/emblem.png") no-repeat;
+    /*background:url("/static/img/emblem.png") no-repeat;*/
     padding-left: 150px
 }
 
@@ -26,5 +26,12 @@ form.login_form {
     background-color: #FFFFFF;
     border: 1px solid gray;
     border-radius: 5px;
+    padding: 10px;
+}
+
+img {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 500px;
     padding: 10px;
 }

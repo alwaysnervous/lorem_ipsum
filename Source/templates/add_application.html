@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Подача заявки</h1>
+<meta charset="UTF-8">
 
+<h1 align="center">Подача заявки</h1>
+<br>
+<p align="justify">
+<a href="/" class="btn btn-secondary">Назад</a>
 <form action="" method="post">
     {{ form.hidden_tag() }}
     {{ form.csrf_token }}

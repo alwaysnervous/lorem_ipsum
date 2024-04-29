@@ -1,19 +1,17 @@
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, StringField, BooleanField, DateTimeField, SelectField, FileField
+from wtforms import SubmitField, StringField, BooleanField, SelectField, FileField, IntegerField, SelectMultipleField
 from wtforms.validators import DataRequired
 
 
-def AddJobForm(user_ids, category_ids):
+def AddJobForm(user_full_names_and_ids, category_names_and_ids):
     class Form(FlaskForm):
         job = StringField('Название работы', validators=[DataRequired()])
-        team_leader = SelectField('ID руководителя команды', choices=user_ids, validators=[DataRequired()])
-        collaborators = StringField('Команда', validators=[DataRequired()])
-        start_date = DateTimeField('Дата начала (YYYY-MM-DD HH:MM:SS)')
-        end_date = DateTimeField('Дата окончания')
+        team_leader = SelectField('Руководитель команды', choices=user_full_names_and_ids, validators=[DataRequired()])
+        collaborators = SelectMultipleField('Команда', choices=user_full_names_and_ids, validators=[DataRequired()])
+        work_size = IntegerField('Время выполнения работы', validators=[DataRequired()])
+        category = SelectField('Категория дизайна', choices=category_names_and_ids)
         is_finished = BooleanField('Работа закончена?')
-        category = SelectField('ID категории опасности', choices=category_ids)
-        thumbnail_file = FileField('Привет')
+        thumbnail_file = FileField('Файл миниатюры')
         submit = SubmitField('Добавить')
 
     return Form()
-

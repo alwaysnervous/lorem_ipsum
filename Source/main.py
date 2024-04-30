@@ -310,7 +310,7 @@ def edit_application(application_id):
         else:
             session.close()
             abort(404)
-    return render_template('add_application.html', title='Department Edit', form=form)
+    return render_template('add_application.html', title='Редактирование заявки', form=form)
 
 
 @app.route("/delete-application/<int:application_id>", methods=["GET", "POST"])

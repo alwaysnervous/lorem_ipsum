@@ -32,15 +32,15 @@ def calculate_time_difference_in_hours(date1, date2):
 
 @login_manager.user_loader
 def load_user(user_id):
-    db_sess = db_session.create_session()
-    return db_sess.get(User, user_id)
+    session = db_session.create_session()
+    return session.get(User, user_id)
 
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        db_sess = db_session.create_session()
+        session = db_session.create_session()
         user = User(
             email=form.login.data,
             surname=form.surname.data,
@@ -48,10 +48,11 @@ def register():
             age=form.age.data
         )
         user.set_password(form.password.data)
-        if not db_sess.query(User).all():
+        if not session.query(User).all():
             user.is_admin = True
-        db_sess.add(user)
-        db_sess.commit()
+        session.add(user)
+        session.commit()
+        session.close()
         return redirect("/")
     return render_template("register.html", title="Регистрация", form=form)
 
@@ -60,8 +61,9 @@ def register():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        db_sess = db_session.create_session()
-        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        session = db_session.create_session()
+        user = session.query(User).filter(User.email == form.email.data).first()
+        session.close()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
@@ -80,9 +82,9 @@ def logout():
 @app.route("/add-job", methods=["GET", "POST"])
 @login_required
 def add_job():
-    db_sess = db_session.create_session()
-    user_full_names_and_ids = {user.id: f"{user.name} {user.surname}" for user in db_sess.query(User).all()}
-    category_names_and_ids = {category.id: category.name for category in db_sess.query(Category).all()}
+    session = db_session.create_session()
+    user_full_names_and_ids = {user.id: f"{user.name} {user.surname}" for user in session.query(User).all()}
+    category_names_and_ids = {category.id: category.name for category in session.query(Category).all()}
     form = AddJobForm(tuple(f"{user_id}. {user_full_name}" for user_id, user_full_name
                             in user_full_names_and_ids.items()),
                       tuple(f"{category_id}. {category_name}" for category_id, category_name
@@ -95,6 +97,7 @@ def add_job():
             if filename != '':
                 if filename.split('.')[-1] not in ALLOWED_PHOTO_EXTENSIONS:
                     flash("Некорректное имя файла!", 'error')
+                    session.close()
                     return redirect("/")
                 with open(f'Source/static/img/cases/{filename}', 'wb') as file:
                     file.write(f.read())
@@ -108,27 +111,30 @@ def add_job():
             is_finished=form.is_finished.data,
             thumbnail_file=filename
         )
-        db_sess.add(job)
-        db_sess.commit()
+        session.add(job)
+        session.commit()
+        session.close()
         return redirect('/')
     if current_user.is_admin:
+        session.close()
         return render_template("add_job.html", form=form, title="Добавление работы")
+    session.close()
     return redirect('/')
 
 
 @app.route("/edit-job/<int:job_id>", methods=["GET", "POST"])
 @login_required
 def edit_job(job_id):
-    db_sess = db_session.create_session()
-    user_full_names_and_ids = {user.id: f"{user.name} {user.surname}" for user in db_sess.query(User).all()}
-    category_names_and_ids = {category.id: category.name for category in db_sess.query(Category).all()}
+    session = db_session.create_session()
+    user_full_names_and_ids = {user.id: f"{user.name} {user.surname}" for user in session.query(User).all()}
+    category_names_and_ids = {category.id: category.name for category in session.query(Category).all()}
     form = AddJobForm(tuple(f"{user_id}. {user_full_name}" for user_id, user_full_name
                             in user_full_names_and_ids.items()),
                       tuple(f"{category_id}. {category_name}" for category_id, category_name
                             in category_names_and_ids.items()))
     filename = None
     if request.method == "GET":
-        job = db_sess.query(Jobs).filter(Jobs.id == job_id,
+        job = session.query(Jobs).filter(Jobs.id == job_id,
                                          (Jobs.team_leader == current_user.id) | (
                                                  current_user.id == 1)).first()
         if job:
@@ -142,10 +148,11 @@ def edit_job(job_id):
             if job.thumbnail_file:
                 filename = job.thumbnail_file
         else:
+            session.close()
             abort(404)
     if form.validate_on_submit():
-        db_sess = db_session.create_session()
-        job = db_sess.query(Jobs).filter(Jobs.id == job_id,
+        session = db_session.create_session()
+        job = session.query(Jobs).filter(Jobs.id == job_id,
                                          (Jobs.team_leader == current_user.id) | (
                                                  current_user.id == 1)).first()
         if job:
@@ -155,6 +162,7 @@ def edit_job(job_id):
                 if filename != '':
                     if filename.split('.')[-1] not in ALLOWED_PHOTO_EXTENSIONS:
                         flash("Некорректное имя файла!", 'error')
+                        session.close()
                         return redirect("/")
                     with open(f'Source/static/img/cases/{filename}', 'wb') as file:
                         file.write(f.read())
@@ -166,24 +174,29 @@ def edit_job(job_id):
             job.work_size = form.work_size.data
             job.category = form.category.data.split(".")[0]
             job.is_finished = form.is_finished.data
-            db_sess.commit()
+            session.commit()
+            session.close()
             return redirect('/')
         else:
+            session.close()
             abort(404)
+    session.close()
     return render_template('add_job.html', thumbnail_file=filename, form=form, title='Редактирование работы')
 
 
 @app.route("/delete-job/<int:job_id>", methods=["GET", "POST"])
 @login_required
 def delete_job(job_id):
-    db_sess = db_session.create_session()
-    job = db_sess.query(Jobs).filter(Jobs.id == job_id,
+    session = db_session.create_session()
+    job = session.query(Jobs).filter(Jobs.id == job_id,
                                      (Jobs.team_leader == current_user.id) | current_user.is_admin).first()
 
     if job:
-        db_sess.delete(job)
-        db_sess.commit()
+        session.delete(job)
+        session.commit()
+        session.close()
     else:
+        session.close()
         abort(404)
     return redirect('/')
 
@@ -191,16 +204,17 @@ def delete_job(job_id):
 @app.route("/")
 def portfolio():
     city = get_city_by_ip(request.headers.get('True-Client-Ip'))
-    db_sess = db_session.create_session()
-    jobs = db_sess.query(Jobs).all()
-    users = db_sess.query(User).all()
-    categories = db_sess.query(Category).all()
-    applications = db_sess.query(Application).all()
+    session = db_session.create_session()
+    jobs = session.query(Jobs).all()
+    users = session.query(User).all()
+    categories = session.query(Category).all()
+    applications = session.query(Application).all()
     names = {name.id: (name.surname, name.name) for name in users}
     category_names = {category.id: category.name for category in categories}
     collaborators_names = {job.id: ",\n".join([" ".join(names[int(collaborator_id)])
                                                for collaborator_id in job.collaborators.split(',')]) for job in jobs}
     restricted_to_application = set(application.user_id for application in applications)
+    session.close()
     return render_template("index.html", jobs=jobs,
                            names=names,
                            category_names=category_names,
@@ -216,6 +230,7 @@ def application_list():
     applications = session.query(Application).all()
     users = session.query(User).all()
     full_names = {user.id: f"{user.surname} {user.name}" for user in users}
+    session.close()
     if current_user.is_admin:
         return render_template("applications.html",
                                applications=applications,
@@ -239,9 +254,12 @@ def add_application():
         )
         session.add(depart)
         session.commit()
+        session.close()
         return redirect('/applications')
     if current_user.id not in restricted_to_application:
+        session.close()
         return render_template('add_application.html', title='Подача заявки', form=form)
+    session.close()
     return redirect('/')
 
 
@@ -253,7 +271,9 @@ def edit_uncertain_application():
     restricted_to_application = set(application.user_id for application in applications)
     if current_user.id in restricted_to_application:
         application_id = session.query(Application.id).filter(Application.user_id == current_user.id).first()[0]
+        session.close()
         return redirect(f'/edit-application/{application_id}')
+    session.close()
     return redirect('/add-application')
 
 
@@ -270,6 +290,7 @@ def edit_application(application_id):
             form.what_doing.data = application.what_doing
             form.self_actions.data = application.self_actions
         else:
+            session.close()
             abort(404)
     if form.validate_on_submit():
         session = db_session.create_session()
@@ -280,8 +301,10 @@ def edit_application(application_id):
             application.what_doing = form.what_doing.data
             application.self_actions = form.self_actions.data
             session.commit()
+            session.close()
             return redirect('/applications')
         else:
+            session.close()
             abort(404)
     return render_template('add_application.html', title='Department Edit', form=form)
 

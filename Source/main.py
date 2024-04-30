@@ -88,9 +88,9 @@ def add_job():
             f = request.files['thumbnail_file']
             filename = f.filename.replace(' ', '-')
             if filename != '':
-                with open(f'static/img/cases/{filename}', 'wb') as file:
+                with open(f'Source/static/img/cases/{filename}', 'wb') as file:
                     file.write(f.read())
-                    logging.info(f"Изображение сохранено в static/img/{filename}")
+                    logging.info(f"Изображение сохранено в Source/static/img/{filename}")
         job = Jobs(
             job=form.job.data,
             team_leader=form.team_leader.data.split(".")[0],
@@ -145,9 +145,9 @@ def edit_job(job_id):
                 f = request.files['thumbnail_file']
                 filename = f.filename.replace(' ', '-')
                 if filename != '':
-                    with open(f'static/img/cases/{filename}', 'wb') as file:
+                    with open(f'Source/static/img/cases/{filename}', 'wb') as file:
                         file.write(f.read())
-                        logging.info(f"Изображение сохранено в static/img/cases/{filename}")
+                        logging.info(f"Изображение сохранено в Source/static/img/cases/{filename}")
                         job.thumbnail_file = filename
             job.job = form.job.data
             job.team_leader = form.team_leader.data.split(".")[0]

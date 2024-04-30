@@ -11,11 +11,16 @@ from forms.applications import AddApplicationForm
 from forms.jobs import AddJobForm
 from forms.users import RegisterForm, LoginForm
 
+from ip_api import get_city_by_ip
+
 logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 login_manager = LoginManager(app)
 app.config["SECRET_KEY"] = "yandexlyceum_secret_key"
+
+ALLOWED_PHOTO_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp',
+                            'ico', 'svg', 'tif', 'bmp']
 
 
 def calculate_time_difference_in_hours(date1, date2):
@@ -88,6 +93,9 @@ def add_job():
             f = request.files['thumbnail_file']
             filename = f.filename.replace(' ', '-')
             if filename != '':
+                if filename.split('.')[-1] not in ALLOWED_PHOTO_EXTENSIONS:
+                    flash("Некорректное имя файла!", 'error')
+                    return redirect("/")
                 with open(f'Source/static/img/cases/{filename}', 'wb') as file:
                     file.write(f.read())
                     logging.info(f"Изображение сохранено в Source/static/img/{filename}")
@@ -145,6 +153,9 @@ def edit_job(job_id):
                 f = request.files['thumbnail_file']
                 filename = f.filename.replace(' ', '-')
                 if filename != '':
+                    if filename.split('.')[-1] not in ALLOWED_PHOTO_EXTENSIONS:
+                        flash("Некорректное имя файла!", 'error')
+                        return redirect("/")
                     with open(f'Source/static/img/cases/{filename}', 'wb') as file:
                         file.write(f.read())
                         logging.info(f"Изображение сохранено в Source/static/img/cases/{filename}")
@@ -179,6 +190,7 @@ def delete_job(job_id):
 
 @app.route("/")
 def portfolio():
+    city = get_city_by_ip(request.remote_addr)
     db_sess = db_session.create_session()
     jobs = db_sess.query(Jobs).all()
     users = db_sess.query(User).all()
@@ -194,6 +206,7 @@ def portfolio():
                            category_names=category_names,
                            collaborators_names=collaborators_names,
                            restricted_to_application=restricted_to_application,
+                           city=city,
                            title='Журнал работ')
 
 

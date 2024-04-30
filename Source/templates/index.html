@@ -3,6 +3,9 @@
 {% block content %}
 <meta charset="UTF-8">
 
+{% if city %}
+<h2 align="center">Привет, {{ city }}!</h2>
+{% endif %}
 <h1 align="center">Портфолио</h1>
 {% if current_user.is_authenticated %}
     <br>

@@ -291,7 +291,7 @@ def main():
     db_session.global_init("Source/db/base.db")
     session = db_session.create_session()
     add_categories(session)
-    app.run("", port=8080)
+    app.run(host="0.0.0.0", port=8080)
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@
 {% if current_user.is_authenticated %}
     <br>
     <p align="justify">
-    <a href="/" class="btn btn-secondary">Вернутся к работам</a>
+    <a href="/" class="btn btn-secondary">Вернуться к работам</a>
     {% if current_user.is_authenticated and current_user.id != 1  %}
     <a href="add_application" class="btn btn-secondary">Подать заявку на вступление в команду</a></p>
     {% endif %}

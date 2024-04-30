@@ -288,7 +288,7 @@ def add_categories(session):
 
 
 def main():
-    db_session.global_init("db/base.db")
+    db_session.global_init("Source/db/base.db")
     session = db_session.create_session()
     add_categories(session)
     app.run("", port=8080)

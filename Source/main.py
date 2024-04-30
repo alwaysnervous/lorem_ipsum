@@ -230,11 +230,13 @@ def application_list():
     applications = session.query(Application).all()
     users = session.query(User).all()
     full_names = {user.id: f"{user.surname} {user.name}" for user in users}
+    emails = {user.id: user.email for user in users}
     session.close()
     if current_user.is_admin:
         return render_template("applications.html",
                                applications=applications,
                                full_names=full_names,
+                               emails=emails,
                                title='Список заявок')
     return redirect('/')
 
@@ -284,7 +286,8 @@ def edit_application(application_id):
     if request.method == "GET":
         session = db_session.create_session()
         application = session.query(Application).filter(Application.id == application_id,
-                                                        (current_user.id == Application.user_id) | current_user.is_admin).first()
+                                                        (current_user.id == Application.user_id)
+                                                        | current_user.is_admin).first()
         if application:
             form.allocates_time.data = application.allocates_time
             form.what_doing.data = application.what_doing
@@ -295,7 +298,8 @@ def edit_application(application_id):
     if form.validate_on_submit():
         session = db_session.create_session()
         application = session.query(Application).filter(Application.id == application_id,
-                                                        (current_user.id == Application.user_id) | current_user.is_admin).first()
+                                                        (current_user.id == Application.user_id)
+                                                        | current_user.is_admin).first()
         if application:
             application.allocates_time = form.allocates_time.data
             application.what_doing = form.what_doing.data
@@ -307,6 +311,22 @@ def edit_application(application_id):
             session.close()
             abort(404)
     return render_template('add_application.html', title='Department Edit', form=form)
+
+
+@app.route("/delete-application/<int:application_id>", methods=["GET", "POST"])
+@login_required
+def delete_application(application_id):
+    session = db_session.create_session()
+    application = session.query(Application).filter(Application.id == application_id, current_user.is_admin).first()
+
+    if application:
+        session.delete(application)
+        session.commit()
+        session.close()
+    else:
+        session.close()
+        abort(404)
+    return redirect('/applications')
 
 
 def add_categories(session):

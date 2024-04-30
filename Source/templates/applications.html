@@ -17,12 +17,14 @@
 <div class="table_container">
     <table class="my_table">
         <tr class="my_row">
+            <td class="title" width="250px" bgcolor="#dddddd">Почта</td>
             <td class="title" width="200px" bgcolor="#dddddd">Как зовут</td>
             <td class="title" width="200px" bgcolor="#dddddd">Уделю времени</td>
             <td class="title" width="150px" bgcolor="#dddddd">Чем занимаюсь</td>
             <td class="title" width="100px" bgcolor="#dddddd" align="center">На посту менеджера</td>
         </tr>
         <tr class="my_row">
+            <td class="ordinary" bgcolor="#eeeeff">{{ emails[application.user_id] }}</td>
             <td class="ordinary" bgcolor="#eeeeff">{{ full_names[application.user_id] }}</td>
             <td class="ordinary" bgcolor="#eeeeff">{{ application.allocates_time }}</td>
             <td class="ordinary" bgcolor="#eeeeff">{{ application.what_doing }}</td>

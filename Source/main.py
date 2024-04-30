@@ -148,13 +148,13 @@ def edit_job(job_id):
                     with open(f'static/img/cases/{filename}', 'wb') as file:
                         file.write(f.read())
                         logging.info(f"Изображение сохранено в static/img/cases/{filename}")
+                        job.thumbnail_file = filename
             job.job = form.job.data
             job.team_leader = form.team_leader.data.split(".")[0]
             job.collaborators = ",".join(collaborator.split(".")[0] for collaborator in form.collaborators.data)
             job.work_size = form.work_size.data
             job.category = form.category.data.split(".")[0]
             job.is_finished = form.is_finished.data
-            job.thumbnail_file = filename
             db_sess.commit()
             return redirect('/')
         else:

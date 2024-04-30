@@ -190,7 +190,7 @@ def delete_job(job_id):
 
 @app.route("/")
 def portfolio():
-    city = get_city_by_ip(request.remote_addr)
+    city = request.remote_addr
     db_sess = db_session.create_session()
     jobs = db_sess.query(Jobs).all()
     users = db_sess.query(User).all()
